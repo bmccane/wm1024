@@ -1,10 +1,10 @@
-package net.mccons.demo;
+package net.mccons.hardware;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DemoApplicationTests {
+class HardwareApplicationTests {
 
 	@Test
 	void contextLoads() {

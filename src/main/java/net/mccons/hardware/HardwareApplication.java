@@ -1,13 +1,13 @@
-package net.mccons.demo;
+package net.mccons.hardware;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoApplication {
+public class HardwareApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(HardwareApplication.class, args);
 	}
 
 }
