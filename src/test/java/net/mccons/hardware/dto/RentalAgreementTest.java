@@ -28,7 +28,7 @@ class RentalAgreementTest {
                 .discountAmount(BigDecimal.valueOf(0.30).setScale(2, RoundingMode.HALF_UP))
                 .finalCharge(BigDecimal.valueOf(2.68).setScale(2, RoundingMode.HALF_UP))
                 .build();
-        assertThat(expected.print()).isEqualTo(
+        assertThat(expected.formatted()).isEqualTo(
                 """
                         Tool code: code
                         Tool type: type

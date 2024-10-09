@@ -39,7 +39,7 @@ public class RentalAgreement {
                 .build();
     }
 
-    public String print() {
+    public String formatted() {
         return String.format("""
                         Tool code: %s
                         Tool type: %s
@@ -66,6 +66,10 @@ public class RentalAgreement {
                 getDiscountPercent(),
                 formatCurrency(getDiscountAmount()),
                 formatCurrency(getFinalCharge()));
+    }
+
+    public void print() {
+        System.out.println(formatted());
     }
 
     public String formatCurrency(final BigDecimal value) {
