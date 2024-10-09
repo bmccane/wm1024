@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity(name = "tool_type")
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -27,7 +29,7 @@ public class ToolType {
     private String name;
 
     @Column(name = "daily_charge")
-    private Double charge;
+    private BigDecimal charge;
 
     @Column(name = "weekday")
     private boolean weekday;

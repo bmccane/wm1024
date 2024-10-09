@@ -7,6 +7,8 @@ import net.mccons.hardware.model.Tool;
 import net.mccons.hardware.repository.ToolRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 @Service
@@ -43,6 +45,12 @@ public class RentalService {
                 .filter(date -> isChargeableWeekend(tool, date))
                 .filter(date -> isChargeableHoliday(tool, date))
                 .count();
+        final var preDiscountCharge = tool.getType().getCharge()
+                .multiply(BigDecimal.valueOf(chargeDays))
+                .setScale(2, RoundingMode.HALF_UP);
+        final var discountAmount = preDiscountCharge
+                .multiply(BigDecimal.valueOf(request.getDiscountPercent().doubleValue() / 100.))
+                .setScale(2, RoundingMode.HALF_UP);
 
         return RentalAgreement.from(request)
                 .toBuilder()
@@ -51,6 +59,9 @@ public class RentalService {
                 .dueDate(request.getCheckOutDate().plusDays(request.getRentalDayCount()))
                 .dailyRentalCharge(tool.getType().getCharge())
                 .chargeDays((int) chargeDays)
+                .preDiscountCharge(preDiscountCharge)
+                .discountAmount(discountAmount)
+                .finalCharge(preDiscountCharge.subtract(discountAmount))
                 .build();
     }
 }

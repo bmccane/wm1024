@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Month;
 
@@ -26,11 +28,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class RentalServiceTest {
 
     public static final String CHAINSAW = "Chainsaw";
-    public static final double CHAINSAW_CHARGE = 1.99;
+    public static final BigDecimal CHAINSAW_CHARGE = BigDecimal.valueOf(1.99).setScale(2, RoundingMode.HALF_UP);
     public static final String LADDER = "Ladder";
-    public static final double LADDER_CHARGE = 1.49;
+    public static final BigDecimal LADDER_CHARGE = BigDecimal.valueOf(1.49).setScale(2, RoundingMode.HALF_UP);
     public static final String JACKHAMMER = "Jackhammer";
-    public static final double JACKHAMMER_CHARGE = 2.99;
+    public static final BigDecimal JACKHAMMER_CHARGE = BigDecimal.valueOf(2.99).setScale(2, RoundingMode.HALF_UP);
 
     public static final String DEWALT = "DeWalt";
     public static final String RIDGID = "Ridgid";
@@ -115,8 +117,12 @@ class RentalServiceTest {
                 .checkOutDate(checkOutDate)
                 .dueDate(checkOutDate.plusDays(rentalDays))
                 .dailyRentalCharge(LADDER_CHARGE)
-                .chargeDays(2)
                 .discountPercent(discountPercent)
+                // all remaining values I calculated manually from spec
+                .chargeDays(2)
+                .preDiscountCharge(BigDecimal.valueOf(2.98).setScale(2, RoundingMode.HALF_UP))
+                .discountAmount(BigDecimal.valueOf(0.30).setScale(2, RoundingMode.HALF_UP))
+                .finalCharge(BigDecimal.valueOf(2.68).setScale(2, RoundingMode.HALF_UP))
                 .build();
         assertThat(rentalService.rentEquipment(request))
                 .usingRecursiveComparison()

@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Builder(toBuilder = true)
@@ -16,12 +17,12 @@ public class RentalAgreement {
     private Integer rentalDays;
     private LocalDate checkOutDate;
     private LocalDate dueDate;
-    private Double dailyRentalCharge;
+    private BigDecimal dailyRentalCharge;
     private Integer chargeDays;
-    private Double preDiscountCharge;
+    private BigDecimal preDiscountCharge;
     private Integer discountPercent;
-    private Double discountAmount;
-    private Double finalCharge;
+    private BigDecimal discountAmount;
+    private BigDecimal finalCharge;
 
     public static RentalAgreement from(final RentalRequest request) {
         return RentalAgreement.builder()
