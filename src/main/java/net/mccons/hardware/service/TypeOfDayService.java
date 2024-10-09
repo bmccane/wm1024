@@ -5,7 +5,16 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 
-public class HolidayService {
+public class TypeOfDayService {
+    public static boolean isWeekend(final LocalDate date) {
+        return DayOfWeek.SATURDAY.equals(date.getDayOfWeek()) ||
+                DayOfWeek.SUNDAY.equals(date.getDayOfWeek());
+    }
+
+    public static boolean isWeekday(final LocalDate date) {
+        return !isWeekend(date);
+    }
+
     public static boolean isHoliday(final LocalDate date) {
         return isIndependenceDay(date) || isLaborDay(date);
     }

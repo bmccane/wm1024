@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HolidayServiceTest {
+class TypeOfDayServiceTest {
     @ParameterizedTest
     @CsvSource({
             "2024, 7, 3, false",
@@ -24,6 +24,16 @@ class HolidayServiceTest {
             "2025, 9, 2, false"
     })
     void isHolidayTest(final int year, final int month, final int day, final boolean expected) {
-        assertThat(HolidayService.isHoliday(LocalDate.of(year, month, day))).isEqualTo(expected);
+        assertThat(TypeOfDayService.isHoliday(LocalDate.of(year, month, day))).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "2020, 7, 3, false",
+            "2020, 7, 4, true",
+            "2020, 7, 5, true"
+    })
+    void isWeekend(final int year, final int month, final int day, final boolean expected) {
+        assertThat(TypeOfDayService.isWeekend(LocalDate.of(year, month, day))).isEqualTo(expected);
     }
 }
