@@ -103,14 +103,14 @@ class RentalServiceTest {
 
         final var request = RentalRequest.builder()
                 .toolCode(toolCode)
-                .checkoutDate(checkoutDate)
-                .days(rentalDays)
+                .checkOutDate(checkoutDate)
+                .rentalDayCount(rentalDays)
                 .discountPercent(discountPercent)
                 .build();
         final var expected = RentalAgreement.builder()
                 .toolCode(toolCode)
                 .toolType(LADDER)
-                .brandName(WERNER)
+                .toolBrand(WERNER)
                 .checkOutDate(checkoutDate)
                 .dailyRentalCharge(LADDER_CHARGE)
                 .rentalDays(rentalDays)

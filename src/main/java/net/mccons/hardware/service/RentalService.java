@@ -21,7 +21,7 @@ public class RentalService {
         return RentalAgreement.from(request)
                 .toBuilder()
                 .toolType(tool.getType().getName())
-                .brandName(tool.getBrand().getName())
+                .toolBrand(tool.getBrand().getName())
                 .dailyRentalCharge(tool.getType().getCharge())
                 .build();
     }

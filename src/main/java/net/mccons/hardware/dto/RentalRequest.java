@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 public class RentalRequest {
     private String toolCode;
-    private Integer days;
-    private LocalDate checkoutDate;
+    private Integer rentalDayCount;
     private Integer discountPercent;
+    private LocalDate checkOutDate;
 }

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class RentalAgreement {
     private String toolCode;
     private String toolType;
-    private String brandName;
+    private String toolBrand;
     private Integer rentalDays;
     private LocalDate checkOutDate;
     private LocalDate dueDate;
@@ -26,8 +26,8 @@ public class RentalAgreement {
     public static RentalAgreement from(final RentalRequest request) {
         return RentalAgreement.builder()
                 .toolCode(request.getToolCode())
-                .rentalDays(request.getDays())
-                .checkOutDate(request.getCheckoutDate())
+                .rentalDays(request.getRentalDayCount())
+                .checkOutDate(request.getCheckOutDate())
                 .discountPercent(request.getDiscountPercent())
                 .build();
     }
