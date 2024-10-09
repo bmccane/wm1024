@@ -15,10 +15,14 @@ public class RentalService {
     }
 
     public RentalAgreement rentEquipment(final RentalRequest request) {
-        final var tool = toolRepository.findById(request.getToolCode());
+        final var tool = toolRepository.findById(request.getToolCode())
+                .orElseThrow(() -> new ToolCodeException("No tool found matching: " + request.getToolCode()));
 
-        tool.orElseThrow(() -> new ToolCodeException("No tool found matching: " + request.getToolCode()));
-
-        return RentalAgreement.from(request);
+        return RentalAgreement.from(request)
+                .toBuilder()
+                .toolType(tool.getType().getName())
+                .brandName(tool.getBrand().getName())
+                .dailyRentalCharge(tool.getType().getCharge())
+                .build();
     }
 }

@@ -25,9 +25,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Transactional
 class RentalServiceTest {
 
+    public static final String CHAINSAW = "Chainsaw";
     public static final double CHAINSAW_CHARGE = 1.99;
+    public static final String LADDER = "Ladder";
     public static final double LADDER_CHARGE = 1.49;
+    public static final String JACKHAMMER = "Jackhammer";
     public static final double JACKHAMMER_CHARGE = 2.99;
+
+    public static final String DEWALT = "DeWalt";
+    public static final String RIDGID = "Ridgid";
+    public static final String STIHL = "Stihl";
+    public static final String WERNER = "Werner";
+
+    public static final String TOOL_1_NAME = "CHNS";
+    public static final String TOOL_2_NAME = "LADW";
+    public static final String TOOL_3_NAME = "JAKD";
+    public static final String TOOL_4_NAME = "JAKR";
 
     @Autowired
     private RentalService rentalService;
@@ -42,32 +55,32 @@ class RentalServiceTest {
     public void setup() {
         // populate database for test
         var chainsaw = toolTypeRepository.save(ToolType.builder()
-                .name("Chainsaw")
+                .name(CHAINSAW)
                 .charge(CHAINSAW_CHARGE)
                 .weekday(true)
                 .weekend(true)
                 .build());
         var ladder = toolTypeRepository.save(ToolType.builder()
-                .name("Ladder")
+                .name(LADDER)
                 .charge(LADDER_CHARGE)
                 .weekday(true)
                 .holiday(true)
                 .build());
         var jackhammer = toolTypeRepository.save(ToolType.builder()
-                .name("Jackhammer")
+                .name(JACKHAMMER)
                 .charge(JACKHAMMER_CHARGE)
                 .weekday(true)
                 .build());
 
-        var dewalt = toolBrandRepository.save(ToolBrand.builder().name("DeWalt").build());
-        var ridgid = toolBrandRepository.save(ToolBrand.builder().name("Ridgid").build());
-        var stihl = toolBrandRepository.save(ToolBrand.builder().name("Stihl").build());
-        var werner = toolBrandRepository.save(ToolBrand.builder().name("Werner").build());
+        var dewalt = toolBrandRepository.save(ToolBrand.builder().name(DEWALT).build());
+        var ridgid = toolBrandRepository.save(ToolBrand.builder().name(RIDGID).build());
+        var stihl = toolBrandRepository.save(ToolBrand.builder().name(STIHL).build());
+        var werner = toolBrandRepository.save(ToolBrand.builder().name(WERNER).build());
 
-        toolRepository.save(Tool.builder().code("CHNS").type(chainsaw).brand(stihl).build());
-        toolRepository.save(Tool.builder().code("LADW").type(ladder).brand(werner).build());
-        toolRepository.save(Tool.builder().code("JAKD").type(jackhammer).brand(dewalt).build());
-        toolRepository.save(Tool.builder().code("JAKR").type(jackhammer).brand(ridgid).build());
+        toolRepository.save(Tool.builder().code(TOOL_1_NAME).type(chainsaw).brand(stihl).build());
+        toolRepository.save(Tool.builder().code(TOOL_2_NAME).type(ladder).brand(werner).build());
+        toolRepository.save(Tool.builder().code(TOOL_3_NAME).type(jackhammer).brand(dewalt).build());
+        toolRepository.save(Tool.builder().code(TOOL_4_NAME).type(jackhammer).brand(ridgid).build());
     }
 
     @Test
@@ -83,7 +96,7 @@ class RentalServiceTest {
 
     @Test
     void rentEquipmentTest2() {
-        final var toolCode = "LADW";
+        final var toolCode = TOOL_2_NAME;
         final var checkoutDate = LocalDate.of(2024, Month.JULY, 20);
         final var rentalDays = 3;
         final var discountPercent = 10;
@@ -96,7 +109,10 @@ class RentalServiceTest {
                 .build();
         final var expected = RentalAgreement.builder()
                 .toolCode(toolCode)
-                .checkoutDate(checkoutDate)
+                .toolType(LADDER)
+                .brandName(WERNER)
+                .checkOutDate(checkoutDate)
+                .dailyRentalCharge(LADDER_CHARGE)
                 .rentalDays(rentalDays)
                 .discountPercent(discountPercent)
                 .build();

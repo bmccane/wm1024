@@ -14,8 +14,9 @@ public class RentalAgreement {
     private String toolType;
     private String brandName;
     private Integer rentalDays;
-    private LocalDate checkoutDate;
+    private LocalDate checkOutDate;
     private LocalDate dueDate;
+    private Double dailyRentalCharge;
     private Integer chargeDays;
     private Double preDiscountCharge;
     private Integer discountPercent;
@@ -26,7 +27,7 @@ public class RentalAgreement {
         return RentalAgreement.builder()
                 .toolCode(request.getToolCode())
                 .rentalDays(request.getDays())
-                .checkoutDate(request.getCheckoutDate())
+                .checkOutDate(request.getCheckoutDate())
                 .discountPercent(request.getDiscountPercent())
                 .build();
     }
