@@ -54,15 +54,15 @@ class RentalServiceTest {
     @BeforeEach
     public void setup() {
         // populate database for test
-        var chainsaw = toolTypeRepository.save(ToolType.builder()
-                .name(CHAINSAW)
-                .charge(CHAINSAW_CHARGE)
-                .weekday(true)
-                .weekend(true)
-                .build());
         var ladder = toolTypeRepository.save(ToolType.builder()
                 .name(LADDER)
                 .charge(LADDER_CHARGE)
+                .weekday(true)
+                .weekend(true)
+                .build());
+        var chainsaw = toolTypeRepository.save(ToolType.builder()
+                .name(CHAINSAW)
+                .charge(CHAINSAW_CHARGE)
                 .weekday(true)
                 .holiday(true)
                 .build());
@@ -97,13 +97,13 @@ class RentalServiceTest {
     @Test
     void rentEquipmentTest2() {
         final var toolCode = TOOL_2_NAME;
-        final var checkoutDate = LocalDate.of(2024, Month.JULY, 20);
+        final var checkOutDate = LocalDate.of(2020, Month.JULY, 2);
         final var rentalDays = 3;
         final var discountPercent = 10;
 
         final var request = RentalRequest.builder()
                 .toolCode(toolCode)
-                .checkOutDate(checkoutDate)
+                .checkOutDate(checkOutDate)
                 .rentalDayCount(rentalDays)
                 .discountPercent(discountPercent)
                 .build();
@@ -111,9 +111,11 @@ class RentalServiceTest {
                 .toolCode(toolCode)
                 .toolType(LADDER)
                 .toolBrand(WERNER)
-                .checkOutDate(checkoutDate)
-                .dailyRentalCharge(LADDER_CHARGE)
                 .rentalDays(rentalDays)
+                .checkOutDate(checkOutDate)
+                .dueDate(checkOutDate.plusDays(rentalDays))
+                .dailyRentalCharge(LADDER_CHARGE)
+                .chargeDays(2)
                 .discountPercent(discountPercent)
                 .build();
         assertThat(rentalService.rentEquipment(request))
