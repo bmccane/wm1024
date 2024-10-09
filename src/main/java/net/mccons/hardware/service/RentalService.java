@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class RentalService {
     public RentalAgreement rentEquipment(final RentalRequest request) {
-        // TODO add unit test and implement
-        return null;
+        return RentalAgreement.from(request);
     }
 }
