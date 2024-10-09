@@ -2,6 +2,8 @@ package net.mccons.hardware.service;
 
 import net.mccons.hardware.dto.RentalAgreement;
 import net.mccons.hardware.dto.RentalRequest;
+import net.mccons.hardware.exceptions.DiscountPercentException;
+import net.mccons.hardware.exceptions.RentalDayCountException;
 import net.mccons.hardware.exceptions.ToolCodeException;
 import net.mccons.hardware.model.Tool;
 import net.mccons.hardware.repository.ToolRepository;
@@ -34,9 +36,15 @@ public class RentalService {
                 !TypeOfDayService.isHoliday(date);
     }
 
-    public RentalAgreement rentEquipment(final RentalRequest request) {
+    public RentalAgreement checkout(final RentalRequest request) {
         final var tool = toolRepository.findById(request.getToolCode())
                 .orElseThrow(() -> new ToolCodeException("No tool found matching: " + request.getToolCode()));
+        if (request.getRentalDayCount() < 1) {
+            throw new RentalDayCountException("Rental day count must be 1 or greater: " + request.getRentalDayCount());
+        }
+        if (request.getDiscountPercent() < 0 || request.getDiscountPercent() > 100) {
+            throw new DiscountPercentException("Discount percent must be between 0 and 100: " + request.getDiscountPercent());
+        }
 
         final var firstChargeDate = request.getCheckOutDate().plusDays(1);
         final var endDate = firstChargeDate.plusDays(request.getRentalDayCount());

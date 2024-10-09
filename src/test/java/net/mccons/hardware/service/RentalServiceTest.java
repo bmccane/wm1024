@@ -3,6 +3,8 @@ package net.mccons.hardware.service;
 import jakarta.transaction.Transactional;
 import net.mccons.hardware.dto.RentalAgreement;
 import net.mccons.hardware.dto.RentalRequest;
+import net.mccons.hardware.exceptions.DiscountPercentException;
+import net.mccons.hardware.exceptions.RentalDayCountException;
 import net.mccons.hardware.exceptions.ToolCodeException;
 import net.mccons.hardware.model.Tool;
 import net.mccons.hardware.model.ToolBrand;
@@ -28,9 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class RentalServiceTest {
 
     public static final String CHAINSAW = "Chainsaw";
-    public static final BigDecimal CHAINSAW_CHARGE = BigDecimal.valueOf(1.99).setScale(2, RoundingMode.HALF_UP);
+    public static final BigDecimal CHAINSAW_CHARGE = BigDecimal.valueOf(1.49).setScale(2, RoundingMode.HALF_UP);
     public static final String LADDER = "Ladder";
-    public static final BigDecimal LADDER_CHARGE = BigDecimal.valueOf(1.49).setScale(2, RoundingMode.HALF_UP);
+    public static final BigDecimal LADDER_CHARGE = BigDecimal.valueOf(1.99).setScale(2, RoundingMode.HALF_UP);
     public static final String JACKHAMMER = "Jackhammer";
     public static final BigDecimal JACKHAMMER_CHARGE = BigDecimal.valueOf(2.99).setScale(2, RoundingMode.HALF_UP);
 
@@ -39,10 +41,10 @@ class RentalServiceTest {
     public static final String STIHL = "Stihl";
     public static final String WERNER = "Werner";
 
-    public static final String TOOL_1_NAME = "CHNS";
-    public static final String TOOL_2_NAME = "LADW";
-    public static final String TOOL_3_NAME = "JAKD";
-    public static final String TOOL_4_NAME = "JAKR";
+    public static final String CHNS = "CHNS";
+    public static final String LADW = "LADW";
+    public static final String JAKD = "JAKD";
+    public static final String JAKR = "JAKR";
 
     @Autowired
     private RentalService rentalService;
@@ -74,31 +76,67 @@ class RentalServiceTest {
                 .weekday(true)
                 .build());
 
-        var dewalt = toolBrandRepository.save(ToolBrand.builder().name(DEWALT).build());
+        var deWalt = toolBrandRepository.save(ToolBrand.builder().name(DEWALT).build());
         var ridgid = toolBrandRepository.save(ToolBrand.builder().name(RIDGID).build());
         var stihl = toolBrandRepository.save(ToolBrand.builder().name(STIHL).build());
         var werner = toolBrandRepository.save(ToolBrand.builder().name(WERNER).build());
 
-        toolRepository.save(Tool.builder().code(TOOL_1_NAME).type(chainsaw).brand(stihl).build());
-        toolRepository.save(Tool.builder().code(TOOL_2_NAME).type(ladder).brand(werner).build());
-        toolRepository.save(Tool.builder().code(TOOL_3_NAME).type(jackhammer).brand(dewalt).build());
-        toolRepository.save(Tool.builder().code(TOOL_4_NAME).type(jackhammer).brand(ridgid).build());
+        toolRepository.save(Tool.builder().code(CHNS).type(chainsaw).brand(stihl).build());
+        toolRepository.save(Tool.builder().code(LADW).type(ladder).brand(werner).build());
+        toolRepository.save(Tool.builder().code(JAKD).type(jackhammer).brand(deWalt).build());
+        toolRepository.save(Tool.builder().code(JAKR).type(jackhammer).brand(ridgid).build());
     }
 
     @Test
-    void rentEquipmentNoToolFound() {
+    void checkoutNoToolFound() {
         final var request = RentalRequest.builder()
                 .toolCode("ABCD")
                 .build();
 
-        var exception = assertThrows(ToolCodeException.class, () -> rentalService.rentEquipment(request));
+        var exception = assertThrows(ToolCodeException.class, () -> rentalService.checkout(request));
 
         assertThat(exception.getMessage()).isEqualTo("No tool found matching: ABCD");
     }
 
     @Test
-    void rentEquipmentTest2() {
-        final var toolCode = TOOL_2_NAME;
+    void checkoutInvalidRentalDayCount() {
+        final var checkOutDate = LocalDate.of(2015, Month.SEPTEMBER, 3);
+        final var rentalDays = 0;
+        final var discountPercent = 10;
+
+        final var request = RentalRequest.builder()
+                .toolCode(JAKR)
+                .checkOutDate(checkOutDate)
+                .rentalDayCount(rentalDays)
+                .discountPercent(discountPercent)
+                .build();
+        var exception = assertThrows(RentalDayCountException.class, () -> rentalService.checkout(request));
+
+        assertThat(exception.getMessage())
+                .isEqualTo("Rental day count must be 1 or greater: " + request.getRentalDayCount());
+    }
+
+    @Test
+    void checkoutTest1() {
+        final var checkOutDate = LocalDate.of(2015, Month.SEPTEMBER, 3);
+        final var rentalDays = 5;
+        final var discountPercent = 101;
+
+        final var request = RentalRequest.builder()
+                .toolCode(JAKR)
+                .checkOutDate(checkOutDate)
+                .rentalDayCount(rentalDays)
+                .discountPercent(discountPercent)
+                .build();
+        var exception = assertThrows(DiscountPercentException.class, () -> rentalService.checkout(request));
+
+        assertThat(exception.getMessage())
+                .isEqualTo("Discount percent must be between 0 and 100: " + request.getDiscountPercent());
+    }
+
+    @Test
+    void checkoutTest2() {
+        final var toolCode = LADW;
         final var checkOutDate = LocalDate.of(2020, Month.JULY, 2);
         final var rentalDays = 3;
         final var discountPercent = 10;
@@ -120,11 +158,143 @@ class RentalServiceTest {
                 .discountPercent(discountPercent)
                 // all remaining values I calculated manually from spec
                 .chargeDays(2)
-                .preDiscountCharge(BigDecimal.valueOf(2.98).setScale(2, RoundingMode.HALF_UP))
-                .discountAmount(BigDecimal.valueOf(0.30).setScale(2, RoundingMode.HALF_UP))
-                .finalCharge(BigDecimal.valueOf(2.68).setScale(2, RoundingMode.HALF_UP))
+                .preDiscountCharge(BigDecimal.valueOf(3.98).setScale(2, RoundingMode.HALF_UP))
+                .discountAmount(BigDecimal.valueOf(0.40).setScale(2, RoundingMode.HALF_UP))
+                .finalCharge(BigDecimal.valueOf(3.58).setScale(2, RoundingMode.HALF_UP))
                 .build();
-        assertThat(rentalService.rentEquipment(request))
+        assertThat(rentalService.checkout(request))
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void checkoutTest3() {
+        final var toolCode = CHNS;
+        final var checkOutDate = LocalDate.of(2015, Month.JULY, 2);
+        final var rentalDays = 5;
+        final var discountPercent = 25;
+
+        final var request = RentalRequest.builder()
+                .toolCode(toolCode)
+                .checkOutDate(checkOutDate)
+                .rentalDayCount(rentalDays)
+                .discountPercent(discountPercent)
+                .build();
+        final var expected = RentalAgreement.builder()
+                .toolCode(toolCode)
+                .toolType(CHAINSAW)
+                .toolBrand(STIHL)
+                .rentalDays(rentalDays)
+                .checkOutDate(checkOutDate)
+                .dueDate(checkOutDate.plusDays(rentalDays))
+                .dailyRentalCharge(CHAINSAW_CHARGE)
+                .discountPercent(discountPercent)
+                // all remaining values I calculated manually from spec
+                .chargeDays(3)
+                .preDiscountCharge(BigDecimal.valueOf(4.47).setScale(2, RoundingMode.HALF_UP))
+                .discountAmount(BigDecimal.valueOf(1.12).setScale(2, RoundingMode.HALF_UP))
+                .finalCharge(BigDecimal.valueOf(3.35).setScale(2, RoundingMode.HALF_UP))
+                .build();
+        assertThat(rentalService.checkout(request))
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void checkoutTest4() {
+        final var toolCode = JAKD;
+        final var checkOutDate = LocalDate.of(2015, Month.SEPTEMBER, 3);
+        final var rentalDays = 6;
+        final var discountPercent = 0;
+
+        final var request = RentalRequest.builder()
+                .toolCode(toolCode)
+                .checkOutDate(checkOutDate)
+                .rentalDayCount(rentalDays)
+                .discountPercent(discountPercent)
+                .build();
+        final var expected = RentalAgreement.builder()
+                .toolCode(toolCode)
+                .toolType(JACKHAMMER)
+                .toolBrand(DEWALT)
+                .rentalDays(rentalDays)
+                .checkOutDate(checkOutDate)
+                .dueDate(checkOutDate.plusDays(rentalDays))
+                .dailyRentalCharge(JACKHAMMER_CHARGE)
+                .discountPercent(discountPercent)
+                // all remaining values I calculated manually from spec
+                .chargeDays(3)
+                .preDiscountCharge(BigDecimal.valueOf(8.97).setScale(2, RoundingMode.HALF_UP))
+                .discountAmount(BigDecimal.valueOf(0).setScale(2, RoundingMode.HALF_UP))
+                .finalCharge(BigDecimal.valueOf(8.97).setScale(2, RoundingMode.HALF_UP))
+                .build();
+        assertThat(rentalService.checkout(request))
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void checkoutTest5() {
+        final var toolCode = JAKR;
+        final var checkOutDate = LocalDate.of(2015, Month.JULY, 2);
+        final var rentalDays = 9;
+        final var discountPercent = 0;
+
+        final var request = RentalRequest.builder()
+                .toolCode(toolCode)
+                .checkOutDate(checkOutDate)
+                .rentalDayCount(rentalDays)
+                .discountPercent(discountPercent)
+                .build();
+        final var expected = RentalAgreement.builder()
+                .toolCode(toolCode)
+                .toolType(JACKHAMMER)
+                .toolBrand(RIDGID)
+                .rentalDays(rentalDays)
+                .checkOutDate(checkOutDate)
+                .dueDate(checkOutDate.plusDays(rentalDays))
+                .dailyRentalCharge(JACKHAMMER_CHARGE)
+                .discountPercent(discountPercent)
+                // all remaining values I calculated manually from spec
+                .chargeDays(5)
+                .preDiscountCharge(BigDecimal.valueOf(14.95).setScale(2, RoundingMode.HALF_UP))
+                .discountAmount(BigDecimal.valueOf(0).setScale(2, RoundingMode.HALF_UP))
+                .finalCharge(BigDecimal.valueOf(14.95).setScale(2, RoundingMode.HALF_UP))
+                .build();
+        assertThat(rentalService.checkout(request))
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void checkoutTest6() {
+        final var toolCode = JAKR;
+        final var checkOutDate = LocalDate.of(2020, Month.JULY, 2);
+        final var rentalDays = 4;
+        final var discountPercent = 50;
+
+        final var request = RentalRequest.builder()
+                .toolCode(toolCode)
+                .checkOutDate(checkOutDate)
+                .rentalDayCount(rentalDays)
+                .discountPercent(discountPercent)
+                .build();
+        final var expected = RentalAgreement.builder()
+                .toolCode(toolCode)
+                .toolType(JACKHAMMER)
+                .toolBrand(RIDGID)
+                .rentalDays(rentalDays)
+                .checkOutDate(checkOutDate)
+                .dueDate(checkOutDate.plusDays(rentalDays))
+                .dailyRentalCharge(JACKHAMMER_CHARGE)
+                .discountPercent(discountPercent)
+                // all remaining values I calculated manually from spec
+                .chargeDays(1)
+                .preDiscountCharge(BigDecimal.valueOf(2.99).setScale(2, RoundingMode.HALF_UP))
+                .discountAmount(BigDecimal.valueOf(1.50).setScale(2, RoundingMode.HALF_UP))
+                .finalCharge(BigDecimal.valueOf(1.49).setScale(2, RoundingMode.HALF_UP))
+                .build();
+        assertThat(rentalService.checkout(request))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
     }
