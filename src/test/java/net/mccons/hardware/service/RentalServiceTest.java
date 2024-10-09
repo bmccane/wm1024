@@ -1,7 +1,9 @@
 package net.mccons.hardware.service;
 
+import jakarta.transaction.Transactional;
 import net.mccons.hardware.dto.RentalAgreement;
 import net.mccons.hardware.dto.RentalRequest;
+import net.mccons.hardware.exceptions.ToolCodeException;
 import net.mccons.hardware.model.Tool;
 import net.mccons.hardware.model.ToolBrand;
 import net.mccons.hardware.model.ToolType;
@@ -17,8 +19,10 @@ import java.time.LocalDate;
 import java.time.Month;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@Transactional
 class RentalServiceTest {
 
     public static final double CHAINSAW_CHARGE = 1.99;
@@ -37,9 +41,23 @@ class RentalServiceTest {
     @BeforeEach
     public void setup() {
         // populate database for test
-        var chainsaw = toolTypeRepository.save(ToolType.builder().name("Chainsaw").charge(CHAINSAW_CHARGE).weekday(true).weekend(true).build());
-        var ladder = toolTypeRepository.save(ToolType.builder().name("Ladder").charge(LADDER_CHARGE).weekday(true).holiday(true).build());
-        var jackhammer = toolTypeRepository.save(ToolType.builder().name("Jackhammer").charge(JACKHAMMER_CHARGE).weekday(true).build());
+        var chainsaw = toolTypeRepository.save(ToolType.builder()
+                .name("Chainsaw")
+                .charge(CHAINSAW_CHARGE)
+                .weekday(true)
+                .weekend(true)
+                .build());
+        var ladder = toolTypeRepository.save(ToolType.builder()
+                .name("Ladder")
+                .charge(LADDER_CHARGE)
+                .weekday(true)
+                .holiday(true)
+                .build());
+        var jackhammer = toolTypeRepository.save(ToolType.builder()
+                .name("Jackhammer")
+                .charge(JACKHAMMER_CHARGE)
+                .weekday(true)
+                .build());
 
         var dewalt = toolBrandRepository.save(ToolBrand.builder().name("DeWalt").build());
         var ridgid = toolBrandRepository.save(ToolBrand.builder().name("Ridgid").build());
@@ -50,6 +68,17 @@ class RentalServiceTest {
         toolRepository.save(Tool.builder().code("LADW").type(ladder).brand(werner).build());
         toolRepository.save(Tool.builder().code("JAKD").type(jackhammer).brand(dewalt).build());
         toolRepository.save(Tool.builder().code("JAKR").type(jackhammer).brand(ridgid).build());
+    }
+
+    @Test
+    void rentEquipmentNoToolFound() {
+        final var request = RentalRequest.builder()
+                .toolCode("ABCD")
+                .build();
+
+        var exception = assertThrows(ToolCodeException.class, () -> rentalService.rentEquipment(request));
+
+        assertThat(exception.getMessage()).isEqualTo("No tool found matching: ABCD");
     }
 
     @Test
