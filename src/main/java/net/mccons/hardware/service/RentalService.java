@@ -16,24 +16,26 @@ import java.time.LocalDate;
 @Service
 public class RentalService {
     private final ToolRepository toolRepository;
+    private final TypeOfDayService typeOfDayService;
 
-    public RentalService(ToolRepository toolRepository) {
+    public RentalService(ToolRepository toolRepository, TypeOfDayServiceImpl typeOfDayService) {
         this.toolRepository = toolRepository;
+        this.typeOfDayService = typeOfDayService;
     }
 
-    private static boolean isChargeableWeekday(Tool tool, LocalDate date) {
+    private boolean isChargeableWeekday(Tool tool, LocalDate date) {
         return (tool.getType().isWeekday() && TypeOfDayService.isWeekday(date)) ||
                 !TypeOfDayService.isWeekday(date);
     }
 
-    private static boolean isChargeableWeekend(Tool tool, LocalDate date) {
+    private boolean isChargeableWeekend(Tool tool, LocalDate date) {
         return (tool.getType().isWeekend() && TypeOfDayService.isWeekend(date)) ||
                 !TypeOfDayService.isWeekend(date);
     }
 
-    private static boolean isChargeableHoliday(Tool tool, LocalDate date) {
-        return (tool.getType().isHoliday() && TypeOfDayService.isHoliday(date)) ||
-                !TypeOfDayService.isHoliday(date);
+    private boolean isChargeableHoliday(Tool tool, LocalDate date) {
+        return (tool.getType().isHoliday() && typeOfDayService.isHoliday(date)) ||
+                !typeOfDayService.isHoliday(date);
     }
 
     public RentalAgreement checkout(final RentalRequest request) {

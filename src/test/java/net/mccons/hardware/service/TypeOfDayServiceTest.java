@@ -1,13 +1,20 @@
 package net.mccons.hardware.service;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 class TypeOfDayServiceTest {
+    @InjectMocks
+    private TypeOfDayServiceImpl typeOfDayService;
+
     @ParameterizedTest
     @CsvSource({
             "2024, 7, 3, false",
@@ -24,7 +31,7 @@ class TypeOfDayServiceTest {
             "2025, 9, 2, false"
     })
     void isHolidayTest(final int year, final int month, final int day, final boolean expected) {
-        assertThat(TypeOfDayService.isHoliday(LocalDate.of(year, month, day))).isEqualTo(expected);
+        assertThat(typeOfDayService.isHoliday(LocalDate.of(year, month, day))).isEqualTo(expected);
     }
 
     @ParameterizedTest

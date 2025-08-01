@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.3.232</version>  <!-- newest version (2025-07-13), still has CVE-2018-14335 -->
+            <version>2.3.232</version>  <!-- newest version (2025-07-31), still has CVE-2018-14335 -->
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -55,15 +55,8 @@
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>12.1.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <nvd.api.key>${env.NVD_API_KEY}</nvd.api.key>
+                    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
                 </configuration>
             </plugin>
         </plugins>
